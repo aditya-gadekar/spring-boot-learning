@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Course Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #6c5ce7;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #a29bfe;
+        }
+
+        ul {
+            margin-top: 10px;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 6px;
+        }
+
+        .danger {
+            background: #ff4757;
+        }
+
+        .danger:hover {
+            background: #ff6b81;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚀 Student Course Dashboard</h1>
+
+<div class="container">
+
+    <!-- Add Student -->
+    <div class="card">
+        <h3>Add Student</h3>
+        <input type="text" id="studentName" placeholder="Enter name">
+        <button onclick="addStudent()">Add</button>
+    </div>
+
+    <!-- Add Course -->
+    <div class="card">
+        <h3>Add Course</h3>
+        <input type="text" id="courseName" placeholder="Enter course">
+        <button onclick="addCourse()">Add</button>
+    </div>
+
+    <!-- Students -->
+    <div class="card">
+        <h3>Students</h3>
+        <button onclick="getStudents()">Load</button>
+        <ul id="studentList"></ul>
+    </div>
+
+    <!-- Courses -->
+    <div class="card">
+        <h3>Courses</h3>
+        <button onclick="getCourses()">Load</button>
+        <ul id="courseList"></ul>
+    </div>
+
+    <!-- Delete -->
+    <div class="card">
+        <h3>Delete Student</h3>
+        <input type="number" id="deleteStudentId" placeholder="ID">
+        <button class="danger" onclick="deleteStudent()">Delete</button>
+    </div>
+
+    <div class="card">
+        <h3>Delete Course</h3>
+        <input type="number" id="deleteCourseId" placeholder="ID">
+        <button class="danger" onclick="deleteCourse()">Delete</button>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card">
+        <h3>⚠ Danger Zone</h3>
+        <button class="danger" onclick="deleteAllStudents()">Delete All Students</button>
+        <button class="danger" onclick="deleteAllCourses()">Delete All Courses</button>
+    </div>
+
+</div>
+
+<script>
+
+    function addStudent() {
+        let name = document.getElementById("studentName").value;
+
+        fetch("/student/add", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ name: name })
+        })
+        .then(res => res.json())
+        .then(() => alert("Student Added"));
+    }
+
+    function addCourse() {
+        let name = document.getElementById("courseName").value;
+
+        fetch("/course/add", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ courseName: name })
+        })
+        .then(res => res.json())
+        .then(() => alert("Course Added"));
+    }
+
+    function getStudents() {
+        fetch("/student/all")
+        .then(res => res.json())
+        .then(data => {
+            let list = document.getElementById("studentList");
+            list.innerHTML = "";
+            data.forEach(s => {
+                let li = document.createElement("li");
+                li.innerText = s.id + " - " + s.name;
+                list.appendChild(li);
+            });
+        });
+    }
+
+    function getCourses() {
+        fetch("/course/all")
+        .then(res => res.json())
+        .then(data => {
+            let list = document.getElementById("courseList");
+            list.innerHTML = "";
+            data.forEach(c => {
+                let li = document.createElement("li");
+                li.innerText = c.courseId + " - " + c.courseName;
+                list.appendChild(li);
+            });
+        });
+    }
+
+    function deleteStudent() {
+        let id = document.getElementById("deleteStudentId").value;
+
+        fetch("/student/delete/" + id, { method: "DELETE" })
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    }
+
+    function deleteCourse() {
+        let id = document.getElementById("deleteCourseId").value;
+
+        fetch("/course/delete/" + id, { method: "DELETE" })
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    }
+
+    function deleteAllStudents() {
+        fetch("/student/deleteAll", { method: "DELETE" })
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    }
+
+    function deleteAllCourses() {
+        fetch("/course/deleteAll", { method: "DELETE" })
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    }
+
+</script>
+
+</body>
+</html>
