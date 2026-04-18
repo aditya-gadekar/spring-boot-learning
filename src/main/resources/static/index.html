@@ -1,64 +1,113 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>Student Course Dashboard</title>
 
+    ```
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
     <style>
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #1e1e2f, #2c2c54, #3a3a6a, #1e1e2f);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
             color: white;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% }
+            50% { background-position: 100% }
+            100% { background-position: 0% }
         }
 
         h1 {
             text-align: center;
             padding: 20px;
-            letter-spacing: 2px;
+            font-size: 2.5rem;
         }
 
         .container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
             padding: 20px;
         }
 
         .card {
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            transition: 0.3s;
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transition: all 0.4s ease;
+            transform: scale(0.98);
+            animation: fadeIn 0.6s ease forwards;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
         }
 
         input {
-            width: 90%;
-            padding: 10px;
-            margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             outline: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        input::placeholder {
+            color: #ccc;
         }
 
         button {
-            margin-top: 10px;
-            padding: 10px 15px;
+            margin-top: 12px;
+            padding: 12px;
+            width: 100%;
             border: none;
-            border-radius: 8px;
-            background: #6c5ce7;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
             color: white;
             cursor: pointer;
+            font-weight: bold;
             transition: 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
         button:hover {
-            background: #a29bfe;
+            transform: scale(1.05);
+        }
+
+        button:active::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: ripple 0.5s;
+        }
+
+        @keyframes ripple {
+            from { transform: scale(0); opacity: 1;}
+            to { transform: scale(2); opacity: 0;}
         }
 
         ul {
@@ -68,20 +117,36 @@
         }
 
         li {
-            background: rgba(255,255,255,0.1);
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 6px;
+            background: rgba(255,255,255,0.12);
+            padding: 10px;
+            margin-top: 6px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        li:hover {
+            background: rgba(255,255,255,0.2);
         }
 
         .danger {
-            background: #ff4757;
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
         }
 
-        .danger:hover {
-            background: #ff6b81;
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2ed573;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: 0.5s;
         }
     </style>
+    ```
+
 </head>
 
 <body>
@@ -90,35 +155,31 @@
 
 <div class="container">
 
-    <!-- Add Student -->
+    ```
     <div class="card">
         <h3>Add Student</h3>
         <input type="text" id="studentName" placeholder="Enter name">
         <button onclick="addStudent()">Add</button>
     </div>
 
-    <!-- Add Course -->
     <div class="card">
         <h3>Add Course</h3>
         <input type="text" id="courseName" placeholder="Enter course">
         <button onclick="addCourse()">Add</button>
     </div>
 
-    <!-- Students -->
     <div class="card">
         <h3>Students</h3>
         <button onclick="getStudents()">Load</button>
         <ul id="studentList"></ul>
     </div>
 
-    <!-- Courses -->
     <div class="card">
         <h3>Courses</h3>
         <button onclick="getCourses()">Load</button>
         <ul id="courseList"></ul>
     </div>
 
-    <!-- Delete -->
     <div class="card">
         <h3>Delete Student</h3>
         <input type="number" id="deleteStudentId" placeholder="ID">
@@ -131,19 +192,32 @@
         <button class="danger" onclick="deleteCourse()">Delete</button>
     </div>
 
-    <!-- Danger Zone -->
     <div class="card">
         <h3>⚠ Danger Zone</h3>
         <button class="danger" onclick="deleteAllStudents()">Delete All Students</button>
         <button class="danger" onclick="deleteAllCourses()">Delete All Courses</button>
     </div>
+    ```
 
 </div>
 
+<div id="toast"></div>
+
 <script>
+    function showToast(msg) {
+        let toast = document.getElementById("toast");
+        toast.innerText = msg;
+        toast.style.opacity = 1;
+
+        setTimeout(() => {
+            toast.style.opacity = 0;
+        }, 2000);
+    }
 
     function addStudent() {
         let name = document.getElementById("studentName").value;
+
+        if (!name) return showToast("Enter valid name");
 
         fetch("/student/add", {
             method: "POST",
@@ -151,11 +225,16 @@
             body: JSON.stringify({ name: name })
         })
         .then(res => res.json())
-        .then(() => alert("Student Added"));
+        .then(() => {
+            showToast("Student Added");
+            getStudents();
+        });
     }
 
     function addCourse() {
         let name = document.getElementById("courseName").value;
+
+        if (!name) return showToast("Enter valid course");
 
         fetch("/course/add", {
             method: "POST",
@@ -163,10 +242,14 @@
             body: JSON.stringify({ courseName: name })
         })
         .then(res => res.json())
-        .then(() => alert("Course Added"));
+        .then(() => {
+            showToast("Course Added");
+            getCourses();
+        });
     }
 
     function getStudents() {
+        showToast("Loading...");
         fetch("/student/all")
         .then(res => res.json())
         .then(data => {
@@ -181,6 +264,7 @@
     }
 
     function getCourses() {
+        showToast("Loading...");
         fetch("/course/all")
         .then(res => res.json())
         .then(data => {
@@ -196,32 +280,29 @@
 
     function deleteStudent() {
         let id = document.getElementById("deleteStudentId").value;
-
         fetch("/student/delete/" + id, { method: "DELETE" })
         .then(res => res.text())
-        .then(msg => alert(msg));
+        .then(msg => showToast(msg));
     }
 
     function deleteCourse() {
         let id = document.getElementById("deleteCourseId").value;
-
         fetch("/course/delete/" + id, { method: "DELETE" })
         .then(res => res.text())
-        .then(msg => alert(msg));
+        .then(msg => showToast(msg));
     }
 
     function deleteAllStudents() {
         fetch("/student/deleteAll", { method: "DELETE" })
         .then(res => res.text())
-        .then(msg => alert(msg));
+        .then(msg => showToast(msg));
     }
 
     function deleteAllCourses() {
         fetch("/course/deleteAll", { method: "DELETE" })
         .then(res => res.text())
-        .then(msg => alert(msg));
+        .then(msg => showToast(msg));
     }
-
 </script>
 
 </body>
